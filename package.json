@@ -1,0 +1,28 @@
+{
+  "name": "promise-keeper",
+  "version": "0.1.0",
+  "description": "Forge app: tracks promises support agents make to customers",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc -p .",
+    "validate:manifest": "node -e \"require('@forge/manifest').validate(false,require('path').resolve('manifest.yml')).then(r=>{console.log(r.success?'manifest OK':r.errors);process.exit(r.success?0:1)})\""
+  },
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@forge/cli": "^15.0.0",
+    "@types/node": "^22.20.5",
+    "@types/react": "^18.3.31",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7"
+  },
+  "dependencies": {
+    "@forge/api": "^8.4.0",
+    "@forge/bridge": "^7.2.1",
+    "@forge/kvs": "^2.1.1",
+    "@forge/llm": "^1.0.9",
+    "@forge/react": "^12.4.0",
+    "@forge/resolver": "^2.0.2",
+    "react": "^18.3.1"
+  },
+  "private": true
+}
