@@ -4,7 +4,7 @@
   "description": "Forge app: tracks promises support agents make to customers",
   "scripts": {
     "test": "vitest run",
-    "typecheck": "tsc -p .",
+    "typecheck": "tsc -p . --noEmit",
     "validate:manifest": "node -e \"require('@forge/manifest').validate(false,require('path').resolve('manifest.yml')).then(r=>{console.log(r.success?'manifest OK':r.errors);process.exit(r.success?0:1)})\""
   },
   "license": "UNLICENSED",

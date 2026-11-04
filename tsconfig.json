@@ -7,7 +7,7 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "noEmit": true,
+    "noEmit": false,
     "lib": ["ES2022", "DOM"],
     "types": ["node"]
   },
