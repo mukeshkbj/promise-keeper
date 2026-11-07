@@ -6,6 +6,7 @@ import { promisesWithStatus } from './storage';
 export async function onComment(event: any) {
   const issueKey = event?.issue?.key;
   const commentId = event?.comment?.id;
+  console.log(`[pk] comment event ${issueKey ?? '?'}/${commentId ?? '?'}`);
   if (!issueKey || !commentId) return;
   const n = await handleComment(issueKey, String(commentId));
   if (n) console.log(`Proposed ${n} promise(s) on ${issueKey}`);

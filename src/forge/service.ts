@@ -83,10 +83,21 @@ function applyAssessment(p: PromiseRecord, ctx: Awaited<ReturnType<typeof getDel
 export async function handleComment(issueKey: string, commentId: string): Promise<number> {
   const c = await getComment(issueKey, commentId);
   // Only public agent replies on JSM requests. Customers can never create promises.
-  if (!c || c.isPublic !== true || c.authorType === 'customer') return 0;
-  if (!mightContainPromise(c.text)) return 0;
+  if (!c) {
+    console.log(`[pk] ${issueKey}/${commentId}: comment not readable`);
+    return 0;
+  }
+  if (c.isPublic !== true || c.authorType === 'customer') {
+    console.log(`[pk] ${issueKey}: skipped (public=${c.isPublic}, author=${c.authorType})`);
+    return 0;
+  }
+  if (!mightContainPromise(c.text)) {
+    console.log(`[pk] ${issueKey}: no promise words`);
+    return 0;
+  }
 
   const proposals = await proposePromises(c.text);
+  console.log(`[pk] ${issueKey}: LLM proposed ${proposals.length}`);
   if (!proposals.length) return 0;
 
   const existing = await promisesForRequest(issueKey);

@@ -6,6 +6,12 @@ import type { PromiseRecord, PromiseStatus } from '../engine';
 
 const ENTITY = 'promise';
 
+// Forge entity values cannot be empty strings, and some empty fields are index keys
+// (dueDate, issueKey), so blanks are stored as a placeholder and restored on read.
+const NONE = '~none';
+const put = (v: string | null | undefined): string => (v === null || v === undefined || v === '' ? NONE : v);
+const get = (v: string | undefined): string => (v === undefined || v === NONE ? '' : v);
+
 interface StoredPromise {
   id: string;
   requestKey: string;
@@ -30,49 +36,53 @@ interface StoredPromise {
   history: unknown;
 }
 
-const toStored = (p: PromiseRecord): StoredPromise => ({
-  id: p.id,
-  requestKey: p.requestKey,
-  customerOrg: p.customerOrg,
-  madeBy: p.madeBy,
-  quote: p.quote,
-  what: p.what,
-  kind: p.kind,
-  timePhrase: p.timePhrase,
-  dueDate: p.dueDate ?? '',
-  dueSource: p.dueSource,
-  issueKey: p.issueKey ?? '',
-  anchorType: p.anchor.type,
-  anchorKey: p.anchor.key,
-  anchorName: p.anchor.name ?? '',
-  status: p.status,
-  statusReason: p.statusReason,
+export const toStored = (p: PromiseRecord): StoredPromise => ({
+  id: put(p.id),
+  requestKey: put(p.requestKey),
+  customerOrg: put(p.customerOrg),
+  madeBy: put(p.madeBy),
+  quote: put(p.quote),
+  what: put(p.what),
+  kind: put(p.kind),
+  timePhrase: put(p.timePhrase),
+  dueDate: put(p.dueDate),
+  dueSource: put(p.dueSource),
+  issueKey: put(p.issueKey),
+  anchorType: put(p.anchor.type),
+  anchorKey: put(p.anchor.key),
+  anchorName: put(p.anchor.name),
+  status: put(p.status),
+  statusReason: put(p.statusReason),
   customerTold: p.customerTold,
-  confirmedBy: p.confirmedBy ?? '',
-  createdAt: p.createdAt,
-  updatedAt: p.updatedAt,
-  history: p.history.slice(-20),
+  confirmedBy: put(p.confirmedBy),
+  createdAt: put(p.createdAt),
+  updatedAt: put(p.updatedAt),
+  history: p.history.length ? p.history.slice(-20) : [{ at: p.updatedAt, change: 'created' }],
 });
 
-const fromStored = (s: StoredPromise): PromiseRecord => ({
-  id: s.id,
-  requestKey: s.requestKey,
-  customerOrg: s.customerOrg,
-  madeBy: s.madeBy,
-  quote: s.quote,
-  what: s.what,
-  kind: s.kind as PromiseRecord['kind'],
-  timePhrase: s.timePhrase,
-  dueDate: s.dueDate || null,
-  dueSource: s.dueSource as PromiseRecord['dueSource'],
-  issueKey: s.issueKey || null,
-  anchor: { type: s.anchorType as PromiseRecord['anchor']['type'], key: s.anchorKey, name: s.anchorName || undefined },
-  status: s.status as PromiseStatus,
-  statusReason: s.statusReason,
-  customerTold: s.customerTold,
-  confirmedBy: s.confirmedBy || null,
-  createdAt: s.createdAt,
-  updatedAt: s.updatedAt,
+export const fromStored = (s: StoredPromise): PromiseRecord => ({
+  id: get(s.id),
+  requestKey: get(s.requestKey),
+  customerOrg: get(s.customerOrg),
+  madeBy: get(s.madeBy),
+  quote: get(s.quote),
+  what: get(s.what),
+  kind: get(s.kind) as PromiseRecord['kind'],
+  timePhrase: get(s.timePhrase),
+  dueDate: get(s.dueDate) || null,
+  dueSource: (get(s.dueSource) || 'none') as PromiseRecord['dueSource'],
+  issueKey: get(s.issueKey) || null,
+  anchor: {
+    type: (get(s.anchorType) || 'date') as PromiseRecord['anchor']['type'],
+    key: get(s.anchorKey) || 'date',
+    name: get(s.anchorName) || undefined,
+  },
+  status: get(s.status) as PromiseStatus,
+  statusReason: get(s.statusReason),
+  customerTold: Boolean(s.customerTold),
+  confirmedBy: get(s.confirmedBy) || null,
+  createdAt: get(s.createdAt),
+  updatedAt: get(s.updatedAt),
   history: Array.isArray(s.history) ? (s.history as PromiseRecord['history']) : [],
 });
 
