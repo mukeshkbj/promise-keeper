@@ -13,7 +13,7 @@ Codegeist 2026 entry. Status of the bonus-relevant pieces:
 | Rovo agent + 4 actions (`rovo:agent`, `action`) | Deployed; live test pending |
 | MCP tools (`rovo:mcp`) + `SKILL.md` | Deployed; live test pending |
 | Teamwork Graph | Mapping only (`src/engine/graph.ts`); nothing reads or writes the graph yet |
-| Marketplace listing | Not started |
+| Marketplace listing | Assets ready in `docs/marketplace/` (icon, banners, highlights, listing text, privacy answers); submission pending |
 
 ## How it works
 
@@ -90,5 +90,4 @@ Useful while developing: `forge tunnel` (live reload) and `forge logs`.
 ## Not built yet
 
 - Demo seed script (Acme, SUP-101 linked to ENG-42 in release 4.2).
-- Marketplace listing assets (privacy policy, icon, support URL).
 - Graph write-back (spike 2).
