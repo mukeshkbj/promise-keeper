@@ -1,0 +1,31 @@
+{
+  "name": "Promise Keeper for JSM",
+  "tagline": "See which customer promises are at risk before the date passes, tied to the Jira work and release that must deliver them.",
+  "summary": "Turns the promises agents make in replies into tracked commitments. Each one is tied to its fix version or sprint, and flagged at risk the moment delivery slips, with a plain-English reason.",
+  "highlights": [
+    {
+      "title": "Every promise, captured from the reply",
+      "summary": "When an agent writes \"the fix is in our next release\", Promise Keeper proposes a promise with the exact words and a due date from the linked fix version. The agent confirms it in one click.",
+      "caption": "A promise proposed from a public reply, dated from release 4.2 of the linked issue."
+    },
+    {
+      "title": "At risk the moment delivery slips",
+      "summary": "Move the release, pull the issue from the version, or let work stall, and the promise turns at risk with the reason, before the customer is let down. The queue page shows what needs attention.",
+      "caption": "Release 4.2 moved to 20 Nov, so the promise for 13 Nov is flagged at risk with the reason."
+    },
+    {
+      "title": "A ledger per customer, and AI agents too",
+      "summary": "See open, at-risk, kept and broken promises for each customer. A Rovo agent drafts honest updates, and MCP tools let AI agents check existing promises before they reply.",
+      "caption": "The Needs attention queue and the per-customer ledger with the kept rate."
+    }
+  ],
+  "moreDetails": "Support teams promise things every day: a fix in the next release, an update by Friday. SLAs track how fast you reply, not whether you kept your word, and nobody tells support when a release moves.\n\nPromise Keeper reads public agent replies, proposes the commitments it finds, and links each one to the Jira issue, fix version or sprint that must deliver it. Dates come from rules, not guesses. When delivery slips, the promise turns at risk with the reason. When the work ships and the customer is told, it is kept.\n\nRuns entirely on Atlassian (Forge), uses read-only Jira scopes, never posts to customers, and only shows promises on requests the viewer can open.",
+  "keywords": ["jira service management", "customer commitments", "sla", "release tracking", "support", "rovo", "mcp"],
+  "urls": {
+    "documentation": "https://mukeshkbj.github.io/promise-keeper/",
+    "privacy": "https://mukeshkbj.github.io/promise-keeper/privacy",
+    "support": "https://mukeshkbj.github.io/promise-keeper/support",
+    "source": "https://github.com/mukeshkbj/promise-keeper",
+    "issues": "https://github.com/mukeshkbj/promise-keeper/issues"
+  }
+}
