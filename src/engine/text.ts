@@ -64,3 +64,27 @@ export function mightContainPromise(text: string): boolean {
   if (t.length < 12) return false;
   return COMMITMENT.some((r) => r.test(t)) && TIME.some((r) => r.test(t));
 }
+
+const MONTH = '(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\.?';
+const WHEN = new RegExp(
+  '\\b(?:(?:by|before|on|until|in|within)\\s+)?(?:(?:next|this|coming)\\s+)?(?:' +
+    [
+      'today', 'tonight', 'tomorrow',
+      'end of (?:the )?(?:day|week|month|sprint)',
+      'next week', 'this week', 'next month',
+      '(?:mon|tues|wednes|thurs|fri|satur|sun)day',
+      '(?:\\d+|a|one|two|three|four|five) (?:working |business )?(?:hours?|days?|weeks?)',
+      `\\d{1,2}(?:st|nd|rd|th)?(?: of)? ${MONTH}(?:,? \\d{4})?`,
+      `${MONTH} \\d{1,2}(?:st|nd|rd|th)?(?:,? \\d{4})?`,
+      '\\d{4}-\\d{2}-\\d{2}',
+      '\\d{1,2}/\\d{1,2}(?:/\\d{2,4})?',
+      '(?:next|upcoming|coming) (?:release|version|sprint|build|patch)',
+    ].join('|') +
+    ')\\b',
+);
+
+/** The first time phrase in a draft reply ("by Friday", "next release"), or '' if none. */
+export function findTimePhrase(text: string): string {
+  const m = normalise(text).match(WHEN);
+  return m ? m[0].trim() : '';
+}

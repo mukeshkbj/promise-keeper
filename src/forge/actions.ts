@@ -1,7 +1,7 @@
 // Actions for the Rovo agent. The same actions are exposed as MCP tools via rovo:mcp.
 // Inputs arrive as top-level payload fields. Every action checks the caller can open the request.
 
-import { checkReplyAgainstPromises, normalise, resolveDue, todayIn } from '../engine';
+import { checkReplyAgainstPromises, findTimePhrase, normalise, resolveDue, todayIn } from '../engine';
 import { getDeliveryContext, siteTimeZone, visibleToUser } from './jira';
 import { logPromise } from './service';
 import { getPromise, promisesForRequest } from './storage';
@@ -49,13 +49,15 @@ export async function checkBeforeReply(payload: any) {
   const open = (await promisesForRequest(payload.requestKey)).filter((p) => p.status === 'open' || p.status === 'at_risk');
   const draft = String(payload?.draftReply ?? '');
   const tz = await siteTimeZone();
+  // Use the caller's time words, or find them in the draft itself.
+  const timePhrase = String(payload?.timePhrase ?? '').trim() || findTimePhrase(draft);
   let draftDue: string | null = null;
-  if (payload?.timePhrase) {
-    const issueKey = open[0]?.issueKey ?? null;
-    draftDue = resolveDue(String(payload.timePhrase), new Date(), await getDeliveryContext(issueKey), { timeZone: tz }).dueDate;
+  if (timePhrase) {
+    const delivery = open.find((p) => p.kind === 'fix' || p.kind === 'delivery') ?? open[0];
+    draftDue = resolveDue(timePhrase, new Date(), await getDeliveryContext(delivery?.issueKey ?? null), { timeZone: tz }).dueDate;
   }
   const result = checkReplyAgainstPromises(draft, draftDue, open);
-  return { ...result, openPromises: open.map(brief), today: todayIn(new Date(), tz) };
+  return { ...result, timePhrase: timePhrase || null, impliedDate: draftDue, openPromises: open.map(brief), today: todayIn(new Date(), tz) };
 }
 
 /** An AI agent records a promise it just made in a reply. */

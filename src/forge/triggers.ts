@@ -1,7 +1,7 @@
 // Product event and schedule handlers.
 
 import { handleComment, refreshForAnchor, refreshForIssue, refreshPromises } from './service';
-import { promisesWithStatus } from './storage';
+import { getSetting, promisesWithStatus, setSetting } from './storage';
 
 export async function onComment(event: any) {
   const issueKey = event?.issue?.key;
@@ -37,9 +37,18 @@ export async function onSprintChanged(event: any) {
   await refreshForAnchor(`sprint:${id}`);
 }
 
-/** Daily: dates pass without any Jira event, so re-check every live promise. */
+// Dates pass without any Jira event, so live promises are re-checked on a schedule.
+// Hourly, a fixed-size batch at a time, so one run never approaches Forge's time limit.
+const SWEEP_BATCH = 40;
+
 export async function dailySweep() {
-  const live = [...(await promisesWithStatus('open')), ...(await promisesWithStatus('at_risk'))];
-  const changed = await refreshPromises(live);
-  console.log(`Daily sweep: ${live.length} live, ${changed.length} changed`);
+  const live = [...(await promisesWithStatus('open')), ...(await promisesWithStatus('at_risk'))].sort((a, b) =>
+    a.id.localeCompare(b.id),
+  );
+  if (!live.length) return;
+  const start = ((await getSetting<number>('sweepOffset')) ?? 0) % live.length;
+  const batch = [...live.slice(start), ...live.slice(0, start)].slice(0, SWEEP_BATCH);
+  const changed = await refreshPromises(batch);
+  await setSetting('sweepOffset', (start + batch.length) % live.length);
+  console.log(`[pk] sweep: ${batch.length}/${live.length} checked, ${changed.length} changed`);
 }

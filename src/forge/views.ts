@@ -26,7 +26,7 @@ export async function panelData(issueKey: string) {
   return {
     made: madeHere.map(view),
     carried: dependsHere.map(view),
-    carriedCount: carried.filter((p) => ['open', 'at_risk'].includes(p.status)).length,
+    carriedCount: dependsHere.length,
   };
 }
 

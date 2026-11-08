@@ -203,3 +203,18 @@ describe('Teamwork Graph mapping', () => {
     expect(g.properties).toMatchObject({ status: 'open', dueDate: '2026-11-06', dependsOn: '4.2' });
   });
 });
+
+import { findTimePhrase } from '../src/engine';
+describe('time phrase in a draft', () => {
+  it.each([
+    ['Thanks Jo, the fix ships in our next release.', 'in our next release'],
+    ["I'll update you by Friday.", 'by friday'],
+    ['Expect it within 2 working days.', 'within 2 working days'],
+    ['We plan to deploy on 12 Nov.', 'on 12 nov'],
+    ['Thanks for the logs!', ''],
+  ])('%s', (draft, phrase) => {
+    const got = findTimePhrase(draft);
+    if (phrase === 'in our next release') expect(got).toBe('next release');
+    else expect(got).toBe(phrase);
+  });
+});

@@ -2,12 +2,18 @@
 
 A Forge app for Jira Service Management. It turns the promises agents make in replies
 ("the fix is in our next release", "I'll update you Friday") into tracked commitments,
-ties each one to the Jira work and release that must deliver it, and warns the agent
-**before** the promise breaks.
+ties each one to the Jira work and release that must deliver it, and flags it as
+**at risk** in the request panel and the queue page as soon as delivery slips, before the
+promised date passes.
 
-Codegeist 2026 entry. Bonus coverage: Rovo agent + actions (Best Agents), `rovo:mcp`
-tools + `SKILL.md` (Best MCP), Teamwork Graph mapping (Best Teamwork Graph, write-back
-pending the spike below), free Marketplace listing (Best Marketplace).
+Codegeist 2026 entry. Status of the bonus-relevant pieces:
+
+| Piece | Status |
+| --- | --- |
+| Rovo agent + 4 actions (`rovo:agent`, `action`) | Deployed; live test pending |
+| MCP tools (`rovo:mcp`) + `SKILL.md` | Deployed; live test pending |
+| Teamwork Graph | Mapping only (`src/engine/graph.ts`); nothing reads or writes the graph yet |
+| Marketplace listing | Not started |
 
 ## How it works
 
@@ -26,7 +32,8 @@ Jira: version / sprint / issue changes ──► reverse index ──► risk ru
 - **Risk is deterministic.** A promise turns at risk when its release moves past the due date,
   the issue is pulled from the version, the due date is near and work isn't done, or work stalls.
   Every status carries a reason, e.g. `Release 4.2 now 2026-11-13, after the promised 2026-11-06`.
-- **Never auto-sends.** Drafts only; a person always sends.
+- **Never auto-sends.** The app reads Jira and never posts to customers. Update drafts come
+  from the Rovo agent's `draft-update` action, and a person always sends them.
 
 ## Layout
 
@@ -36,7 +43,7 @@ Jira: version / sprint / issue changes ──► reverse index ──► risk ru
 | `src/forge/` | Storage (Custom Entity Store), Jira reads, LLM call, service, triggers, resolver, Rovo/MCP actions. |
 | `src/frontend/` | UI Kit: issue panel (confirm + track) and global page (at-risk queue + customer ledgers). |
 | `skills/promise-keeper/SKILL.md` | Instructions for third-party agents using the MCP tools. |
-| `test/` | 37 engine tests built around the demo story. |
+| `test/` | 45 tests: engine (built around the demo story) and storage mapping. |
 
 ## Run the checks
 

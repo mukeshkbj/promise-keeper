@@ -28,13 +28,25 @@ resolver.define('refreshPanel', async ({ context }) => {
   return key ? panelData(key) : { made: [], carried: [], carriedCount: 0 };
 });
 
+const ISSUE_KEY = /^[A-Z][A-Z0-9_]+-\d+$/;
+const YMD = /^\d{4}-\d{2}-\d{2}$/;
+
 resolver.define('confirm', async ({ payload, context }) => {
   await assertCanEdit(payload.id);
-  return confirmPromise(payload.id, (context as any).accountId, {
-    what: payload.what,
-    dueDate: payload.dueDate,
-    issueKey: payload.issueKey,
-  });
+  let issueKey: string | null | undefined = payload.issueKey;
+  if (issueKey !== undefined && issueKey !== null) {
+    issueKey = String(issueKey).trim().toUpperCase();
+    if (!ISSUE_KEY.test(issueKey)) throw new Error('Delivery issue must look like ENG-42');
+    // The app reads delivery issues as itself, so only accept ones this user can open.
+    if (!(await visibleToUser([issueKey])).has(issueKey)) throw new Error(`You cannot open ${issueKey}`);
+  }
+  let dueDate: string | null | undefined = payload.dueDate;
+  if (dueDate !== undefined && dueDate !== null) {
+    dueDate = String(dueDate).slice(0, 10);
+    if (!YMD.test(dueDate) || Number.isNaN(Date.parse(`${dueDate}T00:00:00Z`))) throw new Error('Due date must be a valid date');
+  }
+  const what = typeof payload.what === 'string' ? payload.what : undefined;
+  return confirmPromise(payload.id, (context as any).accountId, { what, dueDate, issueKey });
 });
 
 resolver.define('outcome', async ({ payload, context }) => {

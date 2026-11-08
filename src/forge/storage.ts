@@ -116,17 +116,6 @@ export const promisesForAnchor = (anchorKey: string) => byIndex('by-anchor', anc
 export const promisesForOrg = (org: string) => byIndex('by-org', org, 500);
 export const promisesWithStatus = (status: PromiseStatus, limit = 500) => byIndex('by-status', status, limit);
 
-/** Sequential, readable ids (PRM-1, PRM-2…). Collisions are retried. */
-export async function nextPromiseId(): Promise<string> {
-  for (let attempt = 0; attempt < 5; attempt++) {
-    const n = ((await kvs.get<number>('seq:promise')) ?? 0) + 1;
-    await kvs.set('seq:promise', n);
-    const id = `PRM-${n}`;
-    if (!(await entity().get(id))) return id;
-  }
-  return `PRM-${Date.now().toString(36).toUpperCase()}`;
-}
-
 export async function getSetting<T>(key: string): Promise<T | undefined> {
   return kvs.get<T>(`setting:${key}`);
 }

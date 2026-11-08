@@ -11,7 +11,6 @@ import { getComment, getDeliveryContext, getRequestInfo, siteTimeZone } from './
 import { proposePromises } from './llm';
 import {
   getPromise,
-  nextPromiseId,
   promisesForAnchor,
   promisesForIssue,
   promisesForRequest,
@@ -42,11 +41,12 @@ async function draftPromise(
   proposal: Proposal,
   madeBy: string,
   status: 'proposed' | 'open',
+  id: string,
 ): Promise<PromiseRecord> {
   const { req, issueKey, ctx, tz, res, anchor } = await resolveFields(requestKey, proposal.timePhrase);
 
   const base: PromiseRecord = {
-    id: await nextPromiseId(),
+    id,
     requestKey,
     customerOrg: req?.customerOrg ?? 'Unknown customer',
     madeBy,
@@ -103,10 +103,12 @@ export async function handleComment(issueKey: string, commentId: string): Promis
   const existing = await promisesForRequest(issueKey);
   const known = new Set(existing.map((p) => p.quote.toLowerCase()));
   let created = 0;
-  for (const proposal of proposals) {
+  for (const [i, proposal] of proposals.entries()) {
     if (known.has(proposal.quote.toLowerCase())) continue;
     const madeBy = c.authorType === 'app' ? `ai:${c.authorId}` : c.authorId;
-    await savePromise(await draftPromise(issueKey, proposal, madeBy, 'proposed'));
+    // Comment ids are unique per site, so this id can't collide even when replies arrive together.
+    const id = `PRM-${c.id}-${i + 1}`;
+    await savePromise(await draftPromise(issueKey, proposal, madeBy, 'proposed', id));
     created++;
   }
   return created;
@@ -182,6 +184,12 @@ export async function setOutcome(
 ): Promise<PromiseRecord> {
   const p = await getPromise(id);
   if (!p) throw new Error(`No promise ${id}`);
+  const allowed: Record<typeof outcome, PromiseRecord['status'][]> = {
+    dismissed: ['proposed'],
+    withdrawn: ['open', 'at_risk'],
+    told: ['open', 'at_risk'],
+  };
+  if (!allowed[outcome].includes(p.status)) throw new Error(`Cannot mark a ${p.status} promise as ${outcome}`);
   let next: PromiseRecord;
   if (outcome === 'told') {
     next = withHistory({ ...p, customerTold: true }, `customer told by ${accountId}`);
@@ -199,7 +207,8 @@ export async function logPromise(
   proposal: Proposal,
   agentName: string,
 ): Promise<PromiseRecord> {
-  const p = await draftPromise(requestKey, proposal, `ai:${agentName}`, 'open');
+  const id = `PRM-AI-${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 5).toUpperCase()}`;
+  const p = await draftPromise(requestKey, proposal, `ai:${agentName}`, 'open', id);
   await savePromise(p);
   return p;
 }

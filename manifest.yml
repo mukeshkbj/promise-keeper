@@ -1,7 +1,7 @@
 # Promise Keeper: tracks the promises support agents make to customers.
-# Replace app.id by running `forge register` once.
+# To deploy under your own account, run `forge register` (it replaces app.id).
 app:
-  id: ari:cloud:ecosystem::app/00000000-0000-0000-0000-000000000000
+  id: ari:cloud:ecosystem::app/9a315f58-d4f2-4502-8fff-45dbf580c61c
   runtime:
     name: nodejs22.x
   storage:
@@ -92,9 +92,9 @@ modules:
         - avi:jira-software:closed:sprint
 
   scheduledTrigger:
-    - key: daily-sweep
+    - key: promise-sweep
       function: dailySweep
-      interval: day
+      interval: hour
 
   # ---- Forge-hosted LLM (keeps Runs on Atlassian eligibility) ----
   llm:
@@ -178,6 +178,11 @@ modules:
           type: string
           required: false
           description: The time words from the quote, e.g. "by Friday".
+        reply:
+          title: Full reply
+          type: string
+          required: false
+          description: The full reply the quote came from, used to check the time phrase.
         agentName:
           title: Agent name
           type: string
@@ -204,6 +209,10 @@ modules:
       prompt: >
         You help support agents and account managers keep the promises made to customers.
         Use list-promises to answer questions about a request or a customer organisation.
+        Before suggesting any reply to a customer, call check-before-reply with the draft and
+        warn the user about any at-risk promise or date conflict it returns.
+        When the user says they sent a reply containing a commitment, record it with log-promise,
+        using their exact words as the quote.
         Use draft-update to draft honest updates when a promise is at risk: name the original
         promise, the new expected date if delivery data gives one, and the next step.
         Never invent dates. Never claim a message was sent; you only draft.
