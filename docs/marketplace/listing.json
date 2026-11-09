@@ -1,6 +1,6 @@
 {
   "name": "Promise Keeper for JSM",
-  "tagline": "See which customer promises are at risk before the date passes, tied to the Jira work and release that must deliver them.",
+  "tagline": "See which customer promises are at risk before the date passes, tied to the Jira work and release that must deliver them",
   "summary": "Turns the promises agents make in replies into tracked commitments. Each one is tied to its fix version or sprint, and flagged at risk the moment delivery slips, with a plain-English reason.",
   "highlights": [
     {
